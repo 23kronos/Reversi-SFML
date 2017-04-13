@@ -53,7 +53,7 @@ void draw_win_scene(sf::RenderWindow &window, int player)
 
 /*
 ** ============================================================
-** Count the soldiers you've gained and lost
+** Count the cities you've conquered and lost
 ** @params: board, player
 ** @return: integer representing number of pieces (soldiers)
 ** ============================================================
@@ -106,7 +106,7 @@ int check_win(std::vector<std::vector<int>> &board, int side)
 
 /*
 ** ============================================================
-** Initialize the battlefield, and setup our main camps
+** Initialize the battlefield, and setup our main cities
 ** @params: Window for drawing
 ** @return: none
 ** ============================================================
@@ -195,7 +195,7 @@ void draw_board(sf::RenderWindow &window)
 
 /*
 ** ============================================================
-** Display the number of city states we've lost and won
+** Display the number of cities we've conquered and lost
 ** @params: board, window, player
 ** @return: none
 ** ============================================================
@@ -287,10 +287,11 @@ void draw_slot(sf::RenderWindow &window, int player, int row, int col,
 
 /*
 ** ============================================================
-** Is your proposed move an ethical act of war? Let's check
+** Is your proposed move follow standard war ethics? 
+** Let's check
 ** @params: Board, row, col, player
-** @return: Number of city states captured by move, if
-**			it was ethical (legal)
+** @return: Number of citie captured by move, if
+**	    it was ethical (legal)
 ** ============================================================
 */
 
@@ -301,7 +302,7 @@ int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int playe
 	if (board[row][col] != 0)
 		return 0;
 
-	// Declare enemy city states
+	// Declare enemy cities
 	int opponent;
 	if (player == 1)
 		opponent = 2;
@@ -317,12 +318,12 @@ int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int playe
 			disc_pos = c;
 	}
 
-	// Make sure we found a disc and that it is at least 2 spots away
+	// Found a city, must be 2 spots away
 	if (disc_pos != -1 && disc_pos > col + 1)
 	{
-		// Flip discs to the right
 		for (int c = col + 1; c < disc_pos; c++)
 		{
+			// Conquer those cities!
 			board[row][c] = player;
 			num_flipped++;
 		}
@@ -336,10 +337,10 @@ int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int playe
 			disc_pos = c;
 	}
 
-	// Make sure we found a city and that it is at least 2 spots away
+	// Found a city, must be 2 spots away
 	if (disc_pos != -1 && disc_pos < col - 1)
 	{
-		// Flip discs to the left
+		// Conquer those cities!
 		for (int c = col - 1; c > disc_pos; c--)
 		{
 			board[row][c] = player;
@@ -355,10 +356,10 @@ int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int playe
 			disc_pos = r;
 	}
 
-	// Make sure we found a disc and that it is at least 2 spots away
+	// Found a city, must be 2 spots away
 	if (disc_pos != -1 && disc_pos < row - 1)
 	{
-		// Flip discs above
+		// Conquer those cities!
 		for (int r = row - 1; r > disc_pos; r--)
 		{
 			board[r][col] = player;
@@ -374,10 +375,10 @@ int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int playe
 			disc_pos = r;
 	}
 
-	// Make sure we found a disc and that it is at least 2 spots away
+	// Found a city, must be 2 spots away
 	if (disc_pos != -1 && disc_pos > row + 1)
 	{
-		// Flip discs below
+		// Conquer those cities!
 		for (int r = row + 1; r < disc_pos; r++)
 		{
 			board[r][col] = player;
@@ -395,12 +396,13 @@ int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int playe
 		c--;
 	}
 
-	// Make sure we found a disc and that it is at least 2 spots away
+	// Found a city, must be 2 spots away
 	if (disc_pos != -1 && disc_pos < row - 1)
 	{
 		c = col - 1;
 		for (int r = row - 1; r > disc_pos; r--)
 		{
+			// Conquer those cities!
 			board[r][c] = player;
 			num_flipped++;
 			c--;
@@ -417,12 +419,13 @@ int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int playe
 		c++;
 	}
 
-	// Make sure we found a disc and that it is at least 2 spots away
+	// Found a city, must be 2 spots away
 	if (disc_pos != -1 && disc_pos < row - 1)
 	{
 		c = col + 1;
 		for (int r = row - 1; r > disc_pos; r--)
 		{
+			// Conquer those cities!
 			board[r][c] = player;
 			num_flipped++;
 			c++;
@@ -439,12 +442,13 @@ int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int playe
 		c--;
 	}
 
-	// Make sure we found a disc and that it is at least 2 spots away
+	// Found a city, must be 2 spots away
 	if (disc_pos != -1 && disc_pos > row + 1)
 	{
 		c = col - 1;
 		for (int r = row + 1; r < disc_pos; r++)
 		{
+			// Conquer those cities!
 			board[r][c] = player;
 			num_flipped++;
 			c--;
@@ -461,12 +465,13 @@ int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int playe
 		c++;
 	}
 
-	// Make sure we found a disc and that it is at least 2 spots away
+	// Found a city, must be 2 spots away
 	if (disc_pos != -1 && disc_pos > row + 1)
 	{
 		c = col + 1;
 		for (int r = row + 1; r < disc_pos; r++)
 		{
+			// Conquer those cities!
 			board[r][c] = player;
 			num_flipped++;
 			c++;
