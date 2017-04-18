@@ -2,7 +2,7 @@
 ** ==========================================
 ** Reversi, written in C++ and Assembly
 ** Authors: Jared Sanders, David Paller
-** Revision Date: Aprill 11th, 2017
+** Revision Date: Aprill 17th, 2017
 **===========================================
 */
 
@@ -15,9 +15,8 @@
 
 /*
 ** ============================================================
-** No assembly
-** Wave the flag of victory and parade your troops through the
-** enemy captial to show complete and utter dominance
+** draw the appropriate banner for the winning player, 
+** or a draw
 ** @params: Window, player
 ** @return: none
 ** ============================================================
@@ -67,6 +66,7 @@ int score(std::vector<std::vector<int>> &board, int player) {
 			{
 				_asm {
 					inc sum // increment sum counter for each piece flipped
+							// changes dynamically as the game goes on
 				}
 			}
 		}
@@ -76,7 +76,7 @@ int score(std::vector<std::vector<int>> &board, int player) {
 
 /*
 ** ============================================================
-** Check if game is over, and who won if it is, or if it was
+** Check if game is over, and if it is, who won, or if it was
 ** a draw
 ** @params: board, player
 ** @return: integer representing winner, or draw
@@ -306,32 +306,28 @@ void drawSlot(sf::RenderWindow &window, int player, int row, int col,
 
 int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int player)
 {
+	// intialize variable of number of opp pieces flippd
 	int flipped = 0;
 
+	// if the space isn't empty, it's already illegal
 	if (board[row][col] != 0)
 		return 0;
 
-	// Declare enemy cities
-	int opponent;
-	if (player == 1)
-		opponent = 2;
-	else
-		opponent = 1;
-
 	// Check surroundings to the East
-	int disc = -1;
+	// default state to continue loop, break if changed
+	int disc = -1; 
 	for (int c = col + 1; c < 8 && board[row][c] != 0 && disc == -1; c++)
 	{
 		if (board[row][c] == player)
-			disc = c;
+			disc = c; // found our piece, break the loop
 	}
 
-	// Found a city, must be 2 spots away
+	// Found a city, so disc != -1, must be 2 spots away
 	if (disc != -1 && disc > col + 1)
 	{
 		for (int c = col + 1; c < disc; c++)
 		{
-			// Conquer those cities!
+			// Flip all opp pieces found
 			board[row][c] = player;
 			__asm {
 				inc flipped
@@ -340,11 +336,12 @@ int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int playe
 	}
 
 	// Check surroundings to the West
+	// Reset default state, change to break
 	disc = -1;
 	for (int c = col - 1; c >= 0 && board[row][c] != 0 && disc == -1; c--)
 	{
 		if (board[row][c] == player)
-			disc = c;
+			disc = c; // found our piece, break the loop
 	}
 
 	// Found opp piece, has to be 2 spaces away
@@ -353,19 +350,20 @@ int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int playe
 		// Flip all opp pieces found
 		for (int c = col - 1; c > disc; c--)
 		{
-			board[row][c] = player;
+			board[row][c] = player; // change to our piece
 			__asm {
-				inc flipped
+				inc flipped // increment number flipped
 			}
 		}
 	}
 
-	// Check surroundings to the North
+	// Check pieces to the South
+	// Reset default state, change to break loop
 	disc = -1;
 	for (int r = row - 1; r >= 0 && board[r][col] != 0 && disc == -1; r--)
 	{
 		if (board[r][col] == player)
-			disc = r;
+			disc = r; // found our piece, stop this direction
 	}
 
 	// Found opp, must be 2 spots away
@@ -374,51 +372,53 @@ int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int playe
 		// Flip all opp pieces found
 		for (int r = row - 1; r > disc; r--)
 		{
-			board[r][col] = player;
+			board[r][col] = player; // set our piece
 			__asm {
-				inc flipped
+				inc flipped // increment number flipped
 			}
 		}
 	}
 
-	// Check surroundings to the South
+	// Check pieces to the North
+	// Reset default state, change to break loop
 	disc = -1;
 	for (int r = row + 1; r < 8 && board[r][col] != 0 && disc == -1; r++)
 	{
 		if (board[r][col] == player)
-			disc = r;
+			disc = r; // found our piece, break
 	}
 
-	// Found a city, must be 2 spots away
+	// Found opp, must be 2 spots away
 	if (disc != -1 && disc > row + 1)
 	{
-		// Conquer those cities!
+		// Flip all opp pieces
 		for (int r = row + 1; r < disc; r++)
 		{
-			board[r][col] = player;
+			board[r][col] = player; // place our piece
 			__asm {
-				inc flipped
+				inc flipped // increment number flipped
 			}
 		}
 	}
 
-	// Check surroundings to the North West
+	// Check pieces to the South West
+	// Reset default state, change to break
 	disc = -1;
-	int c = col - 1;
+	int c = col - 1; // col -1 = west, row -1 = south
 	for (int r = row - 1; c >= 0 && r >= 0 && board[r][c] != 0 && disc == -1; r--)
 	{
-		// found our piece. change disc to break for loop
+		
 		if (board[r][c] == player)
-			disc = r;
+			disc = r; // found our piece break this direction
 		__asm {
-			dec c
+			dec c // move west one more column if we haven't broken yet
 		}
 	}
 
 	// Found opp, must be 2 spots away
 	if (disc != -1 && disc < row - 1)
 	{
-		c = col - 1;
+		c = col - 1; // move west 1
 		for (int r = row - 1; r > disc; r--)
 		{
 			// Flip all opp pieces found
@@ -430,16 +430,16 @@ int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int playe
 		}
 	}
 
-	// Check surroundings to the North East
+	// Check surroundings to the South East
+	// Reset default state, change to break
 	disc = -1;
 	c = col + 1; //  1 column to right = east
 	for (int r = row - 1; c < 8 && r >= 0 && board[r][c] != 0 && disc == -1; r--)
 	{
-		// found out piece. stop this direction
 		if (board[r][c] == player)
-			disc = r;
+			disc = r; // found our piece. stop this direction
 		__asm {
-			inc c
+			inc c // if we haven't broken, keep going east
 		}
 	}
 
@@ -458,14 +458,13 @@ int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int playe
 		}
 	}
 
-	// Check surroundings to the South West
+	// Check surroundings to the North West
 	disc = -1; // default state to continue checking, or break if it's not -1
 	c = col - 1; // move column left one = west
 	for (int r = row + 1; c >= 0 && r < 8 && board[r][c] != 0 && disc == -1; r++)
 	{
-		// found our piece. stop this direction
 		if (board[r][c] == player)
-			disc = r;
+			disc = r; // found our piece, break
 		__asm{
 			dec c
 		}
@@ -486,16 +485,17 @@ int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int playe
 		}
 	}
 
-	// Check surroundings to the South East
+	// Check surroundings to the North East
+	// Reset default state, break if changed
 	disc = -1;
 	c = col + 1; // move one column right = east
 	for (int r = row + 1; c < 8 && r < 8 && board[r][c] != 0 && disc == -1; r++)
 	{
 		// hit our piece. stop this direction
 		if (board[r][c] == player)
-			disc = r;
+			disc = r; // found our piece, break
 		__asm {
-			inc c //increment column to continue checking this direction
+			inc c // increment column to continue checking this direction, if we don't break
 		}
 	}
 
@@ -508,8 +508,8 @@ int checkLegal(std::vector<std::vector<int>> &board, int row, int col, int playe
 			// Flip all opp pieces found
 			board[r][c] = player;
 			__asm {
-				inc flipped
-				inc c
+				inc flipped // num flipped + 1
+				inc c // move east 1 more
 			}
 		}
 	}
@@ -545,127 +545,132 @@ bool handle_click(std::vector<std::vector<int>> &board, int &player, int row, in
 		opponent = 1;
 
 	__asm {
-		cmp row, 50
+		cmp row, 50 //if row < 50, i  = 0
 		jl ifrow50
 		jge elserow50
 		ifrow50:
 			mov dword ptr[i],0
 			jmp endif
-		elserow50:
+		elserow50: // else if row >= 50 && < 100 i =1
 			cmp row, 100
 			jl ifrow100
 			jge elserow100
 		ifrow100:
 			mov dword ptr[i], 1
 			jmp endif
-		elserow100:
+		elserow100: // else if row >= 100 && row < 150 i = 2
 			cmp row, 150
 			jl ifrow150
 			jge elserow150
 		ifrow150: 
 			mov dword ptr[i], 2
 			jmp endif
-		elserow150:
+		elserow150: // else if row >= 200 && row < 250 i = 3
 			cmp row, 200
 			jl ifrow200
 			jge elserow200
 		ifrow200:
 			mov dword ptr[i], 3
 			jmp endif
-		elserow200:
+		elserow200: // else if row >= 250 && row < 300 i =4
 			cmp row, 250
 			jl ifrow250
 			jge elserow250
 		ifrow250:
 			mov dword ptr[i], 4
 			jmp endif
-		elserow250:
+		elserow250: // else if row >=300 && < 350 i =5
 			cmp row, 300
 			jl ifrow300
 			jge elserow300
 		ifrow300:
 			mov dword ptr[i], 5
 			jmp endif
-		elserow300:
+		elserow300: // else if row >=350 && < 400 i =5
 			cmp row, 350
 			jl ifrow350
 			jge elserow350
 		ifrow350:
 			mov dword ptr [i], 6
 			jmp endif
-		elserow350:
+		elserow350: // else i = 7
 			mov dword ptr[i], 7
 			jmp endif
 		endif : 
 	}	
 
 	__asm {
-			cmp col, 50
+			cmp col, 50 // if col < 50 j = 0 
 			jl col50
 			jge else50
 
 			col50:
 				mov dword ptr[j],0
 				jmp endcol
-			else50:
+			else50: // else if col >= 50 && col < 100 j =1
 				cmp col, 100
 				jl col100
 				jge else100
 			col100:
 				mov dword ptr[j],1
 				jmp endcol
-			else100:
+			else100: // else if col >= 100 && col < 150 j =2
 				cmp col, 150
 				jl col150
 				jge else150
 			col150:
 				mov dword ptr[j],2
 				jmp endcol
-			else150:
+			else150: // else if col >= 150 && col < 200 j = 3
 				cmp col, 200
 				jl col200
 				jmp else200
 			col200:
 				mov dword ptr[j],3
 				jmp endcol
-			else200:
+			else200: // else if col >= 200 && col < 250 j = 4
 				cmp col, 250
 				jl col250
 				jge else250
 			col250:
 				mov dword ptr[j], 4
 				jmp endcol
-			else250:
+			else250: // else if col >= 250 && col < 300 j = 5
 				cmp col, 300
 				jl col300
 				jge else300
 			col300:
 				mov dword ptr[j],5
 				jmp endcol
-			else300:
+			else300: // else if col >= 300 && col < 350 j = 6
 				cmp col, 350
 				jl col350
 				jge else350
 			col350:
 				mov dword ptr[j],6
 				jmp endcol
-			else350:
+			else350: //else j =7
 				mov dword ptr[j], 7
-			endcol:
+			endcol: // end asm
 	}
 
-	// Check if your tactics are ethical
+	// Check if your move is valid
+	// legal > 0 = valid, legal < 0 = invalid
 	int legal = checkLegal(board, i, j, player);
 	if (board[i][j] == 0)   // Emtpy location found
 	{			
-		// If your tactics are ethical, proceed
+		// If your move is valid, proceed
 		if (legal > 0)
 		{
+			// the call to legal flips all our pieces, then this
+			// places our piece, and displays it
 			board[i][j] = player;
 			return true;
 		}
 		else
 		{
+			// move is invalid.
+			// opponents turn
 			player = opponent;
 			return false;
 		}
@@ -676,11 +681,10 @@ bool handle_click(std::vector<std::vector<int>> &board, int &player, int row, in
 
 /*
 ** ============================================================
-** Main driving function behind our war. The enemy 
-** stole your sweet roll, shot you in the knee with
-** an arrow, or is oppressing your nation, this is what
-** has driven you to war.
-** 
+** Main driving function behind our game. This initializes
+** our playing board, as well as the original four piece. It
+** then handles our mouse clicks, placing pieces that are valid
+** as well as handling if the game is over or not
 ** @params: none
 ** 
 ** @return: none
@@ -747,13 +751,13 @@ void initGame()
 
 		// Call to draw the battlefield
 		drawBoard(window);
-		// Loops below draw our soldiers as the 
-		// battle rages on. 
+		// Loops below draw our pieces as the 
+		// game plays on
 		for (int i = 0; i < 8; ++i)
 			for (int j = 0; j < 8; ++j)
 				drawSlot(window, board[i][j], i, j, board);
 
-		// If we win, call the draw scene to announce
+		// If a winner, or draw, call the draw scene to announce
 		// our victory
 		
 		if (win == 1 || win ==2 || win ==3)
@@ -768,8 +772,9 @@ void initGame()
 
 int main() {
 	__asm {
-		; main call to initialize game
+		// main assembly call to our initialize the game.
 		call initGame
+	// end asm
 	}
 	return 0;
 }
